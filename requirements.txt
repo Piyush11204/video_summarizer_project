@@ -1,0 +1,7 @@
+flask==2.3.3
+yt-dlp==2024.12.23
+openai-whisper==20231117
+transformers==4.44.2
+torch==2.4.1
+fpdf2==2.7.6
+reportlab==4.0.7

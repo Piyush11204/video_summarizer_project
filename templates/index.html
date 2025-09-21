@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Summarizer & Quiz Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+             <!-- Download Section -->
+        {% if pdf_file or csv_file or text_file or detailed_pdf %}
+        <div class="download-section">
+            <h3>📥 Download Your Complete Analysis</h3>
+            <p>Get your video analysis in professional formats:</p>
+            <div class="download-buttons">
+                {% if text_file %}
+                <a href="/download/txt" class="download-btn">📄 Text Report</a>
+                {% endif %}
+                {% if pdf_file %}
+                <a href="/download/pdf" class="download-btn">📊 Summary PDF</a>
+                {% endif %}
+                {% if text_pdf %}
+                <a href="/download/text_pdf" class="download-btn" style="background: linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%); font-size: 1.1em; font-weight: bold;">📕 Complete Professional Report PDF</a>
+                {% endif %}
+                {% if detailed_pdf %}
+                <a href="/download/detailed_pdf" class="download-btn" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); font-size: 1.2em; font-weight: bold; border: 2px solid #c44569; box-shadow: 0 4px 15px rgba(238, 90, 36, 0.4);">🔥 DETAILED ANALYSIS REPORT (20 Quizzes + Highlighted Transcript)</a>
+                {% endif %}
+                {% if csv_file %}
+                <a href="/download/csv" class="download-btn">🧠 Quiz Questions CSV (20 Questions)</a>
+                {% endif %}
+            </div>
+            <div style="margin-top: 15px; text-align: center;">
+                {% if detailed_pdf %}
+                <p style="font-size: 1.0em; color: #e74c3c; margin: 10px 0; font-weight: bold; background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%); padding: 15px; border-radius: 10px; border-left: 5px solid #e74c3c;">
+                    🎯 <strong>NEW!</strong> Detailed Analysis Report includes:<br/>
+                    ✅ 20 Comprehensive Quiz Questions (vs 8 in standard)<br/>
+                    ✅ Full Transcript with Highlighted Keywords<br/>
+                    ✅ Advanced Data Extraction (Sentiment, Entities, Topics)<br/>
+                    ✅ Statistical Analysis & Executive Dashboard<br/>
+                    ✅ Enhanced Formatting & Professional Design
+                </p>
+                {% endif %}
+                {% if text_pdf %}
+                <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                    💡 <strong>Standard Report:</strong> Complete Professional Report PDF includes structured formatting, table of contents, and full content analysis.
+                </p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %} linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .form-section {
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .url-form {
+            display: flex;
+            gap: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .url-input {
+            flex: 1;
+            padding: 15px 20px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        .url-input:focus {
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .alert {
+            padding: 15px 20px;
+            margin: 20px 40px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .alert-error {
+            background: #fee;
+            color: #c53030;
+            border-left: 4px solid #c53030;
+        }
+        
+        .alert-success {
+            background: #f0fff4;
+            color: #38a169;
+            border-left: 4px solid #38a169;
+        }
+        
+        .results {
+            padding: 40px;
+        }
+        
+        .section {
+            background: #f8f9fa;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .section-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+        
+        .section-content {
+            padding: 30px;
+        }
+        
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .metadata-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4facfe;
+        }
+        
+        .metadata-label {
+            font-weight: bold;
+            color: #4a5568;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        
+        .metadata-value {
+            color: #2d3748;
+            word-break: break-word;
+        }
+        
+        .summary-text {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: #2d3748;
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            border-left: 4px solid #38a169;
+        }
+        
+        .highlight-item {
+            background: white;
+            margin-bottom: 15px;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #ed8936;
+        }
+        
+        .highlight-id {
+            font-weight: bold;
+            color: #ed8936;
+            margin-bottom: 8px;
+        }
+        
+        .highlight-text {
+            color: #2d3748;
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+        
+        .highlight-time {
+            font-size: 0.9em;
+            color: #718096;
+        }
+        
+        .quiz-item {
+            background: white;
+            margin-bottom: 20px;
+            padding: 25px;
+            border-radius: 8px;
+            border-left: 4px solid #9f7aea;
+        }
+        
+        .quiz-question {
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .quiz-type {
+            background: #9f7aea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+        
+        .quiz-answer {
+            color: #4a5568;
+            font-style: italic;
+            background: #f7fafc;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .download-section {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .download-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .download-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: transform 0.3s ease;
+            display: inline-block;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-2px);
+            text-decoration: none;
+            color: white;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4facfe;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .url-form {
+                flex-direction: column;
+            }
+            
+            .download-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .metadata-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎥 Video Summarizer & Quiz Generator</h1>
+            <p>Transform any YouTube video into summaries, highlights, and interactive quizzes</p>
+        </div>
+        
+        <div class="form-section">
+            <form method="POST" class="url-form" onsubmit="showLoading()">
+                <input type="url" name="url" class="url-input" placeholder="Enter YouTube URL here..." required>
+                <button type="submit" class="submit-btn">🚀 Analyze Video</button>
+            </form>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <h3>Processing your video...</h3>
+                <p>This may take a few minutes. Please don't close this tab.</p>
+            </div>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'error' if category == 'error' else 'success' }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        {% if success %}
+            <div class="alert alert-success">
+                ✅ Video processed successfully! Check out the results below.
+            </div>
+        {% endif %}
+        
+        {% if metadata %}
+        <div class="results">
+            <!-- Metadata Section -->
+            <div class="section">
+                <div class="section-header">📊 Video Information</div>
+                <div class="section-content">
+                    <div class="metadata-grid">
+                        <div class="metadata-item">
+                            <div class="metadata-label">Title</div>
+                            <div class="metadata-value">{{ metadata.title }}</div>
+                        </div>
+                        <div class="metadata-item">
+                            <div class="metadata-label">Channel</div>
+                            <div class="metadata-value">{{ metadata.uploader }}</div>
+                        </div>
+                        <div class="metadata-item">
+                            <div class="metadata-label">Duration</div>
+                            <div class="metadata-value">{{ metadata.duration }} seconds</div>
+                        </div>
+                        <div class="metadata-item">
+                            <div class="metadata-label">Views</div>
+                            <div class="metadata-value">{{ metadata.view_count }}</div>
+                        </div>
+                        <div class="metadata-item">
+                            <div class="metadata-label">Upload Date</div>
+                            <div class="metadata-value">{{ metadata.upload_date }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Summary Section -->
+            {% if summary %}
+            <div class="section">
+                <div class="section-header">📝 AI-Generated Summary</div>
+                <div class="section-content">
+                    <div class="summary-text">{{ summary }}</div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Highlights Section -->
+            {% if highlights %}
+            <div class="section">
+                <div class="section-header">⭐ Key Highlights</div>
+                <div class="section-content">
+                    {% for highlight in highlights %}
+                    <div class="highlight-item">
+                        <div class="highlight-id">{{ highlight.clip_id }}</div>
+                        <div class="highlight-text">{{ highlight.text }}</div>
+                        <div class="highlight-time">⏱️ {{ "%.1f"|format(highlight.start) }}s - {{ "%.1f"|format(highlight.end) }}s</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Quiz Section -->
+            {% if quizzes %}
+            <div class="section">
+                <div class="section-header">🧠 Enhanced Quiz Questions (20 Comprehensive Questions)</div>
+                <div class="section-content">
+                    {% for quiz in quizzes %}
+                    <div class="quiz-item">
+                        <div class="quiz-type">{{ quiz.type|replace('_', ' ')|title }}</div>
+                        <div class="quiz-question">{{ loop.index }}. {{ quiz.question }}</div>
+                        {% if quiz.type == 'multiple-choice' and quiz.options %}
+                        <div class="quiz-options" style="margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                            <strong>Options:</strong>
+                            {% for option in quiz.options %}
+                            <div style="margin: 5px 0; padding: 5px; {% if option == quiz.correct %}background: #d4edda; border-left: 3px solid #28a745;{% else %}background: #f8f9fa;{% endif %}">
+                                {{ option }}{% if option == quiz.correct %} ✓{% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="quiz-answer"><strong>Answer:</strong> {{ quiz.answer }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Download Section -->
+        {% if pdf_file or csv_file or text_file %}
+        <div class="download-section">
+            <h3>📥 Download Results</h3>
+            <p>Get your analysis in different formats:</p>
+            <div class="download-buttons">
+                {% if text_file %}
+                <a href="/download/txt" class="download-btn">📄 Text Report</a>
+                {% endif %}
+                {% if pdf_file %}
+                <a href="/download/pdf" class="download-btn">� Summary PDF</a>
+                {% endif %}
+                {% if text_pdf %}
+                <a href="/download/text_pdf" class="download-btn">📕 Complete Report PDF</a>
+                {% endif %}
+                {% if csv_file %}
+                <a href="/download/csv" class="download-btn">🧠 Quiz CSV</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
+        
+        <!-- Footer -->
+        <div style="background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e2e8f0; color: #718096; font-size: 0.9em;">
+            <p>🎯 Built with Flask, Whisper, and Transformers | Powered by AI</p>
+        </div>
+    </div>
+
+    <script>
+        function showLoading() {
+            // Show loading spinner when form is submitted
+            document.getElementById('loading').style.display = 'block';
+            // Disable the submit button to prevent multiple submissions
+            const submitBtn = document.querySelector('.submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+            submitBtn.style.opacity = '0.7';
+        }
+
+        // Auto-hide loading spinner when page loads (in case of refresh)
+        window.addEventListener('load', function() {
+            const loading = document.getElementById('loading');
+            if (loading) {
+                loading.style.display = 'none';
+            }
+        });
+
+        // Add smooth scrolling for better UX
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add loading animation for download buttons
+        document.querySelectorAll('.download-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const originalText = this.textContent;
+                this.textContent = '⏳ Downloading...';
+                this.style.opacity = '0.7';
+                
+                // Reset after 3 seconds (in case download doesn't trigger)
+                setTimeout(() => {
+                    this.textContent = originalText;
+                    this.style.opacity = '1';
+                }, 3000);
+            });
+        });
+
+        // URL validation feedback
+        const urlInput = document.querySelector('.url-input');
+        if (urlInput) {
+            urlInput.addEventListener('input', function() {
+                const url = this.value;
+                const isValidYouTube = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+                
+                if (url && !isValidYouTube) {
+                    this.style.borderColor = '#e53e3e';
+                    this.style.boxShadow = '0 0 0 3px rgba(229, 62, 62, 0.1)';
+                } else if (url && isValidYouTube) {
+                    this.style.borderColor = '#38a169';
+                    this.style.boxShadow = '0 0 0 3px rgba(56, 161, 105, 0.1)';
+                } else {
+                    this.style.borderColor = '#e0e0e0';
+                    this.style.boxShadow = 'none';
+                }
+            });
+        }
+
+        // Add fade-in animation for results
+        const results = document.querySelector('.results');
+        if (results) {
+            results.style.opacity = '0';
+            results.style.transform = 'translateY(20px)';
+            results.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            
+            setTimeout(() => {
+                results.style.opacity = '1';
+                results.style.transform = 'translateY(0)';
+            }, 100);
+        }
+
+        // Add copy-to-clipboard functionality for quiz answers
+        document.querySelectorAll('.quiz-answer').forEach(answer => {
+            answer.style.cursor = 'pointer';
+            answer.title = 'Click to copy answer';
+            
+            answer.addEventListener('click', function() {
+                const text = this.textContent.replace('Answer: ', '');
+                navigator.clipboard.writeText(text).then(() => {
+                    const original = this.innerHTML;
+                    this.innerHTML = '<strong>Answer:</strong> <em>Copied! ✓</em>';
+                    this.style.background = '#e6fffa';
+                    
+                    setTimeout(() => {
+                        this.innerHTML = original;
+                        this.style.background = '#f7fafc';
+                    }, 1000);
+                });
+            });
+        });
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + Enter to submit form
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                const form = document.querySelector('form');
+                if (form && !document.querySelector('.submit-btn').disabled) {
+                    form.dispatchEvent(new Event('submit'));
+                }
+            }
+        });
+
+        // Add progress indicator for long operations
+        let progressInterval;
+        function startProgressIndicator() {
+            const loading = document.getElementById('loading');
+            if (loading && loading.style.display !== 'none') {
+                let dots = 0;
+                progressInterval = setInterval(() => {
+                    const h3 = loading.querySelector('h3');
+                    dots = (dots + 1) % 4;
+                    h3.textContent = 'Processing your video' + '.'.repeat(dots);
+                }, 500);
+            }
+        }
+
+        // Start progress indicator when loading is shown
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                    const loading = document.getElementById('loading');
+                    if (loading && loading.style.display !== 'none') {
+                        startProgressIndicator();
+                    } else {
+                        clearInterval(progressInterval);
+                    }
+                }
+            });
+        });
+
+        const loadingElement = document.getElementById('loading');
+        if (loadingElement) {
+            observer.observe(loadingElement, { attributes: true });
+        }
+
+        // Add error handling for failed downloads
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('Unhandled promise rejection:', event.reason);
+            // Could show user-friendly error message here
+        });
+
+        // Add service worker for offline functionality (optional)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                // Service worker registration could be added here for caching
+            });
+        }
+    </script>
+</body>
+</html>
