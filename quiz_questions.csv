@@ -1,4 +1,21 @@
 question_number,question,answer,type
-1,What was mentioned about: An object in the field that is filled with force...?,An object in the field that is filled with force,short-answer
-2,"Fill in the blank: So, what ______ am going to do is, I am going to put weight on the side",I,fill-in-blank
-3,What was mentioned about: How much is the mass? 1 kg? G value? 9...?,How much is the mass? 1 kg? G value? 9,short-answer
+1,True or False: You will never start anything,True,true-false
+2,"True or False: But remember one thing, this place is easy",True,true-false
+3,"True or False: But remember one thing, this place is not easy",False,true-false
+4,True or False: This place is so beautiful,True,true-false
+5,True or False: You will never start anything,True,true-false
+6,"True or False: But remember one thing, this place is easy",True,true-false
+7,"True or False: But remember one thing, this place is not easy",False,true-false
+8,True or False: This place is so beautiful,True,true-false
+9,Explain what was discussed about 'Place' in the video.,"But remember one thing, this place is easy",short-answer
+10,Explain what was discussed about 'Never' in the video.,You will never start anything,short-answer
+11,Explain what was discussed about 'Start' in the video.,You will never start anything,short-answer
+12,Explain what was discussed about 'People' in the video.,People will laugh at you,short-answer
+13,Explain what was discussed about 'Laugh' in the video.,People will laugh at you,short-answer
+14,Explain what was discussed about 'Enjoy' in the video.,You will enjoy your life,short-answer
+15,Explain what was discussed about 'Remember' in the video.,"But remember one thing, this place is easy",short-answer
+16,What is the main theme or central message of this video?,"You will never start anything. People will laugh at you. You will enjoy your life. But remember one thing, this place is easy. This place is so beautiful.",comprehension
+17,What are the key takeaways or conclusions from this video?,"Based on the content, the main points include: place, never, start, people, laugh and the overall message focuses on You will never start anything",analysis
+18,What specific examples or case studies were mentioned?,You will never start anything People will laugh at you You will enjoy your life,analytical
+19,What problems or challenges were discussed?,"You will enjoy your life But remember one thing, this place is easy This place is so beautiful",analytical
+20,What solutions or recommendations were provided?,"You will never start anything. People will laugh at you. You will enjoy your life. But remember one thing, this place is easy. This place is so beautiful.",analytical
